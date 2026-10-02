@@ -1,0 +1,724 @@
+<title>資訊安全保證 動畫課</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: a fixed 1920×1080 "classroom stage" scaled to fit, lesson board on the left,
+   Q-version lecturer + assistant on the right, subtitle bar below; screening-room chrome around it.
+   The stage is one deliberate visual world (field green from the lesson diagram), so it does not follow theme. */
+:root{
+  --room:#14201a; --room-2:#1d2c24; --room-fg:#e8f1e4; --room-dim:#9fb3a5; --room-line:#2e4237;
+  --field:#eef6e2; --field-2:#e2f0cb; --leaf:#a9d18e; --mint:#5fd9a8; --box:#cfe6a6;
+  --ink:#1f3864; --ink-2:#3b4f75; --paper:#fffdf6; --cream:#fffbe0;
+  --ops:#4f9a2c; --audit:#3d82c4; --ng:#e0662a; --alarm:#d8402f;
+  --c-req:#ed7d31; --c-ana:#a5a5a5; --c-dev:#ffc000; --c-test:#5b9bd5; --c-dep:#70ad47;
+  --f-display:"Huninn","Noto Sans TC","WenQuanYi Zen Hei","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-body:"Noto Sans TC","WenQuanYi Zen Hei","PingFang TC","Microsoft JhengHei",sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--room);color:var(--room-fg);font-family:var(--f-body)}
+body{padding-inline:16px;padding-block:20px 32px}
+.wrap{max-width:1280px;margin:0 auto;display:grid;gap:14px}
+.top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px}
+.top h1{margin:0;font:400 clamp(22px,3vw,30px)/1.2 var(--f-display);letter-spacing:.02em;text-wrap:balance}
+.top p{margin:0;color:var(--room-dim);font-size:14px}
+.screen{position:relative;width:100%;aspect-ratio:16/9;max-width:100%;overflow:hidden;border-radius:14px;background:var(--field);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--field);color:var(--ink);font-family:var(--f-body)}
+.start{position:absolute;inset:0;display:grid;place-items:center;background:rgba(20,32,26,.28);border:0;cursor:pointer;color:#fff;font:inherit}
+.start span{display:flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;background:var(--ops);font:400 clamp(16px,2.2vw,26px)/1 var(--f-display);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.start:focus-visible span{outline:3px solid #fff;outline-offset:4px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.bar button,.bar select{background:var(--room-2);color:var(--room-fg);border:1px solid var(--room-line);border-radius:10px;height:40px;min-width:44px;padding:0 12px;font:inherit;font-size:15px;cursor:pointer}
+.bar button:hover{border-color:var(--room-dim)}
+.bar button:focus-visible,.bar select:focus-visible,.chips button:focus-visible,#seek:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.time{font-variant-numeric:tabular-nums;color:var(--room-dim);font-size:14px;margin-left:auto}
+#seek{position:relative;height:16px;cursor:pointer;flex:1 1 100%;border-radius:8px;background:var(--room-2);border:1px solid var(--room-line);overflow:hidden}
+#seekFill{position:absolute;left:0;top:0;bottom:0;background:var(--mint);opacity:.75}
+.tick{position:absolute;top:0;bottom:0;width:2px;background:var(--room);opacity:.8}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--room-line);background:transparent;color:var(--room-dim);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+.chips button.on{background:var(--mint);color:var(--room);border-color:var(--mint);font-weight:700}
+.note{color:var(--room-dim);font-size:13px;line-height:1.7;max-width:70ch;margin:0}
+body.capture{padding:0;background:var(--field)}
+body.capture .wrap{max-width:none;display:block}
+body.capture .top,body.capture .bar,body.capture .chips,body.capture .note,body.capture .start{display:none}
+body.capture .screen{border-radius:0;box-shadow:none}
+
+/* ---------- stage ---------- */
+#stage *{box-sizing:border-box}
+.bub{position:absolute;border-radius:50%;background:var(--mint);opacity:.28}
+.hdr{position:absolute;left:60px;top:34px;right:60px;height:64px;display:flex;align-items:center;gap:18px}
+.tag{font:700 30px/1 var(--f-body);color:var(--ink);background:#fff;border-radius:999px;padding:14px 28px;box-shadow:0 4px 0 var(--leaf)}
+.lens{font:400 28px/1 var(--f-display);color:#fff;border-radius:14px;padding:14px 22px}
+.lens.ops{background:var(--ops)} .lens.audit{background:var(--audit)} .lens.ng{background:var(--ng)}
+.brand{margin-left:auto;font:400 26px/1 var(--f-display);color:var(--ink-2);opacity:.8}
+.board{position:absolute;left:70px;top:130px;width:1200px;height:730px}
+.scene{position:absolute;inset:0;visibility:hidden}
+.scene.on{visibility:visible}
+.h2{font:400 58px/1.15 var(--f-display);color:var(--ink);margin:0 0 18px;letter-spacing:.02em}
+.it{--p:0;--b:0;opacity:var(--p)}
+.a-rise{transform:translateY(calc((1 - var(--p)) * 40px))}
+.a-slide{transform:translateX(calc((1 - var(--p)) * -70px))}
+.a-pop{transform:scale(var(--b))}
+.a-stamp{transform:scale(calc(2.4 - 1.4 * var(--b))) rotate(-10deg)}
+.a-wipe{clip-path:inset(0 calc((1 - var(--p)) * 100%) 0 0)}
+.quote{background:var(--paper);border:3px solid var(--leaf);border-radius:20px;padding:18px 26px;font:500 28px/1.5 var(--f-body);color:var(--ink-2);position:relative}
+.quote b{display:inline-block;font:400 22px/1 var(--f-display);color:#fff;background:var(--ink);border-radius:8px;padding:6px 10px;margin-right:12px;vertical-align:3px}
+.card{background:#fff;border-radius:22px;box-shadow:0 6px 0 rgba(31,56,100,.12)}
+.hl{transition:none;outline:4px solid transparent}
+.hl.cur{outline-color:var(--c-dev);box-shadow:0 0 0 10px rgba(255,192,0,.22),0 6px 0 rgba(31,56,100,.12)}
+
+/* title */
+.ttl-wrap{position:absolute;left:0;top:70px;width:1200px}
+.ttl{display:flex;gap:6px;font:400 170px/1 var(--f-display);color:var(--ink)}
+.ttl span{display:inline-block;text-shadow:0 8px 0 var(--leaf)}
+.ttl-en{font:700 44px/1 var(--f-body);color:var(--ops);margin:28px 0 46px;letter-spacing:.04em}
+.ctl-row{display:grid;gap:14px;width:900px}
+.ctl{font:700 34px/1 var(--f-body);background:#fff;border-radius:16px;padding:18px 24px;color:var(--ink);box-shadow:0 5px 0 var(--leaf)}
+.ctl em{font-style:normal;color:var(--ops);margin-right:14px}
+.lens-row{display:flex;gap:16px;margin-top:34px}
+.lens-row .lens{font-size:34px;padding:16px 26px}
+
+/* map */
+.field{position:absolute;left:0;top:0;width:800px;height:610px;border-radius:64px;background:var(--field-2);border:4px solid #d3e7b4}
+.field-t{position:absolute;left:0;right:0;top:26px;text-align:center;font:900 34px/1.3 var(--f-body);color:var(--ink)}
+.seed{position:absolute;width:132px;height:132px;border-radius:50%;background:var(--leaf);display:grid;place-items:center;text-align:center;font:900 28px/1.15 var(--f-body);color:var(--ink);box-shadow:0 5px 0 #8dbb6e}
+.arrows{position:absolute;left:0;top:0}
+.rv{position:absolute;left:110px;top:150px;width:580px;height:300px;border-radius:30px;background:var(--box);border:3px solid #bcd98c}
+.rv-t{text-align:center;font:900 32px/1 var(--f-body);color:var(--ink);margin-top:22px}
+.triad{position:absolute;left:0;right:0;top:80px;display:flex;justify-content:center;gap:24px}
+.tc{width:166px;height:166px;border-radius:50%;background:var(--cream);border:3px solid var(--ink);display:grid;place-content:center;text-align:center;font:700 32px/1.2 var(--f-body);color:var(--ink)}
+.tc small{display:block;font:500 20px/1.2 var(--f-body);color:var(--ink-2)}
+.cyc{position:absolute;left:830px;top:0;width:370px;height:610px}
+.ring{position:absolute;width:150px;height:150px}
+.ring svg{position:absolute;inset:0;transform:rotate(calc(var(--t) * 22deg))}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:400 34px/1 var(--f-display);color:var(--ink)}
+.vline{position:absolute;right:58px;top:6px;bottom:6px;width:10px;background:var(--audit);border-radius:5px}
+.vline:before,.vline:after{content:"";position:absolute;left:-14px;border:19px solid transparent}
+.vline:before{top:-30px;border-bottom:26px solid var(--audit)}
+.vline:after{bottom:-30px;border-top:26px solid var(--audit)}
+.vtxt{position:absolute;right:34px;top:60px;width:60px;text-align:center;font:900 30px/1.22 var(--f-body);color:var(--ink);background:var(--field);padding:10px 0}
+.analogy{position:absolute;left:0;top:636px;width:1200px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.an{background:#fff;border-radius:18px;padding:16px 18px;font:700 28px/1.25 var(--f-body);color:var(--ink);display:flex;gap:12px;align-items:center}
+.an i{font-style:normal;font:400 24px/1 var(--f-display);color:#fff;border-radius:10px;padding:8px 10px;flex:none}
+
+/* points / audit / faults */
+.rows{display:grid;gap:14px}
+.row{display:grid;grid-template-columns:200px 1fr;align-items:center;gap:20px;padding:16px 22px}
+.row .k{font:400 32px/1 var(--f-display);color:#fff;background:var(--ops);border-radius:12px;padding:12px 0;text-align:center}
+.row .v{font:500 32px/1.35 var(--f-body);color:var(--ink)}
+.arow{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.qb{position:relative;background:#fff;border-radius:22px;padding:22px 26px 22px 92px;font:700 32px/1.35 var(--f-body);color:var(--ink);display:flex;align-items:center}
+.qb:before{content:"問";position:absolute;left:22px;top:50%;margin-top:-26px;width:52px;height:52px;border-radius:50%;background:var(--audit);color:#fff;display:grid;place-items:center;font:400 28px/1 var(--f-display)}
+.ev{background:#e8f1fb;border:3px dashed var(--audit);border-radius:22px;padding:18px 22px 18px 86px;font:500 29px/1.4 var(--f-body);color:var(--ink);position:relative;display:flex;align-items:center}
+.ev:before{content:"";position:absolute;left:26px;top:50%;margin-top:-20px;width:30px;height:30px;border:6px solid var(--audit);border-radius:50%}
+.ev:after{content:"";position:absolute;left:54px;top:50%;margin-top:10px;width:16px;height:7px;background:var(--audit);border-radius:4px;transform:rotate(45deg)}
+.flt{display:grid;grid-template-columns:76px 1fr;gap:20px;align-items:center;padding:14px 22px}
+.flt .n{width:76px;height:76px;border-radius:50%;background:var(--ng);color:#fff;display:grid;place-items:center;font:400 40px/1 var(--f-display)}
+.flt .v{font:700 34px/1.3 var(--f-body);color:var(--ink)}
+.siren{display:inline-block;width:46px;height:46px;border-radius:50% 50% 8px 8px;background:var(--alarm);vertical-align:-4px;margin-right:16px;box-shadow:0 0 calc(10px + 14px * var(--blink, 0)) rgba(216,64,47,.8)}
+
+/* triad scene */
+.tri3{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:10px}
+.tcol{display:grid;justify-items:center;gap:18px}
+.tbig{width:260px;height:260px;border-radius:50%;background:var(--cream);border:4px solid var(--ink);display:grid;place-content:center;text-align:center;font:400 52px/1.15 var(--f-display);color:var(--ink);box-shadow:0 10px 0 var(--leaf)}
+.tbig small{font:600 26px/1.2 var(--f-body);color:var(--ink-2)}
+.tq{font:900 32px/1.2 var(--f-body);color:var(--ops)}
+.tex{background:#fff;border-radius:18px;padding:16px 20px;font:500 28px/1.4 var(--f-body);color:var(--ink);text-align:center;width:100%}
+.punch{margin-top:34px;background:var(--ink);color:#fff;border-radius:20px;padding:22px 30px;font:400 38px/1.3 var(--f-display);text-align:center}
+
+/* case */
+.case{position:relative;background:var(--paper);border-radius:26px;border:4px solid #e6dcc0;padding:26px 34px;display:grid;gap:18px}
+.case-h{display:flex;align-items:center;gap:18px;font:700 30px/1 var(--f-body);color:var(--ink-2)}
+.case-h b{font:400 30px/1 var(--f-display);color:#fff;background:var(--audit);border-radius:10px;padding:10px 16px}
+.sec{display:grid;grid-template-columns:170px 1fr;gap:20px;align-items:start;padding:16px 0;border-top:3px dashed #e6dcc0}
+.sec .k{font:400 30px/1 var(--f-display);color:#fff;border-radius:10px;padding:12px 0;text-align:center}
+.sec .v{font:500 34px/1.45 var(--f-body);color:var(--ink)}
+.stamp{position:absolute;font:400 46px/1 var(--f-display);color:var(--alarm);border:6px solid var(--alarm);border-radius:14px;padding:12px 20px;background:rgba(255,255,255,.7);pointer-events:none;white-space:nowrap}
+
+/* comply */
+.cgrid{display:grid;grid-template-columns:460px 1fr;gap:34px;margin-top:22px}
+.pyr{display:grid;gap:8px;justify-items:center;padding-top:6px}
+.pl{height:96px;display:grid;place-items:center;font:900 32px/1.1 var(--f-body);color:var(--ink);background:var(--leaf);clip-path:polygon(8% 0,92% 0,100% 100%,0 100%)}
+.pl:nth-child(1){width:46%;background:#8fc56c;clip-path:polygon(50% 0,50% 0,100% 100%,0 100%);height:110px;padding-top:30px}
+.pl:nth-child(2){width:66%;background:#a9d18e}
+.pl:nth-child(3){width:84%;background:#c3e0a8}
+.pl:nth-child(4){width:100%;background:#d9ecc6}
+.pyr-cap{font:500 24px/1.3 var(--f-body);color:var(--ink-2);text-align:center;margin-top:6px}
+.ccol{display:grid;gap:16px;align-content:start}
+.own{padding:18px 24px;font:500 30px/1.45 var(--f-body);color:var(--ink)}
+.own b{color:var(--ops)}
+.meth{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.m{padding:18px 22px}
+.m .k{font:400 30px/1.1 var(--f-display);color:var(--ink);margin-bottom:8px}
+.m .v{font:500 26px/1.4 var(--f-body);color:var(--ink-2)}
+.loop{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.st{position:relative;background:var(--ink);color:#fff;border-radius:18px;padding:18px 10px;text-align:center;font:700 28px/1.25 var(--f-body)}
+.st i{display:block;font:400 26px/1 var(--f-display);color:var(--c-dev);font-style:normal;margin-bottom:8px}
+.st:not(:last-child):after{content:"";position:absolute;right:-16px;top:50%;margin-top:-10px;border:10px solid transparent;border-left:14px solid var(--ink)}
+
+/* versus */
+.vs{display:grid;grid-template-columns:1fr 110px 1fr;align-items:stretch;margin-top:6px}
+.doc{background:#fff;border-radius:18px;padding:22px 26px;position:relative;box-shadow:0 6px 0 rgba(31,56,100,.12)}
+.doc .k{font:700 24px/1 var(--f-body);color:var(--ink-2);margin-bottom:14px;display:flex;gap:10px;align-items:center}
+.doc .k i{font-style:normal;background:var(--ops);color:#fff;border-radius:6px;padding:5px 9px;font-size:20px}
+.doc .v{font:700 38px/1.35 var(--f-body);color:var(--ink)}
+.doc .v mark{background:#d9f0c4;color:var(--ink);padding:0 6px;border-radius:6px}
+.win{background:#fff;border-radius:14px;position:relative;box-shadow:0 6px 0 rgba(31,56,100,.12)}
+.win .tb{border-radius:14px 14px 0 0;background:#2f4a7a;color:#fff;font:600 22px/1 var(--f-body);padding:12px 18px;display:flex;gap:8px;align-items:center}
+.win .tb s{width:14px;height:14px;border-radius:50%;background:#ffffff66;display:inline-block}
+.win .bd{padding:20px 22px;font:500 28px/1.6 var(--f-body);color:var(--ink)}
+.win .bd .bad{background:#fde3df;color:var(--alarm);font-weight:900;padding:2px 8px;border-radius:6px}
+.neq{display:grid;place-items:center;font:400 110px/1 var(--f-display);color:var(--alarm)}
+.vs2{display:grid;grid-template-columns:540px 1fr;gap:30px;margin-top:26px}
+.chk{position:relative;padding:18px 22px}
+.chk h4{margin:0 0 10px;font:700 26px/1 var(--f-body);color:var(--ink-2)}
+.chk table{width:100%;border-collapse:collapse;font:500 25px/1.3 var(--f-body);color:var(--ink)}
+.chk td{border-top:2px solid #e6ecf3;padding:9px 4px}
+.chk td:last-child{color:var(--ops);font-weight:900;text-align:right;white-space:nowrap}
+.fp{display:grid;gap:12px}
+.fp h4{margin:0;font:400 32px/1 var(--f-display);color:var(--audit)}
+.fpi{background:#fff;border-left:10px solid var(--audit);border-radius:14px;padding:13px 18px;font:700 28px/1.3 var(--f-body);color:var(--ink)}
+
+/* sdlc */
+.sgrid{display:grid;grid-template-columns:330px 1fr;gap:30px;margin-top:20px}
+.scyc{position:relative;height:560px}
+.tt{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ttc{padding:18px 22px;border-top:10px solid var(--c-test)}
+.ttc .k{font:400 34px/1.1 var(--f-display);color:var(--ink);margin-bottom:8px}
+.ttc .v{font:500 27px/1.35 var(--f-body);color:var(--ink-2)}
+.strip{margin-top:16px;border-radius:18px;padding:18px 22px;font:700 27px/1.4 var(--f-body)}
+.strip.plan{background:var(--ink);color:#fff}
+.strip.tw{background:#fff3d6;color:var(--ink);border:3px solid var(--c-dev)}
+
+/* story */
+.org{font:700 30px/1 var(--f-body);color:var(--ink-2);display:flex;gap:14px;align-items:center;margin-bottom:22px}
+.org b{font:400 28px/1 var(--f-display);color:#fff;background:var(--audit);border-radius:10px;padding:9px 14px}
+.tl{display:grid;grid-template-columns:repeat(3,1fr);gap:46px}
+.tls{position:relative;padding:20px 22px;min-height:170px}
+.tls .k{font:400 30px/1 var(--f-display);color:#fff;background:var(--ink-2);border-radius:10px;padding:9px 14px;display:inline-block;margin-bottom:14px}
+.tls .v{font:700 32px/1.35 var(--f-body);color:var(--ink)}
+.tls.bad{background:#fde3df}
+.tls.bad .k{background:var(--alarm)}
+.tls:not(:last-child):after{content:"";position:absolute;right:-38px;top:50%;margin-top:-14px;border:14px solid transparent;border-left:20px solid var(--ink-2)}
+.cks{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:30px}
+.ck{display:flex;gap:16px;align-items:center;padding:16px 20px;font:700 30px/1.3 var(--f-body);color:var(--ink)}
+.ck i{flex:none;width:44px;height:44px;border-radius:10px;background:var(--ops);position:relative}
+.ck i:after{content:"";position:absolute;left:14px;top:6px;width:12px;height:22px;border:solid #fff;border-width:0 6px 6px 0;transform:rotate(45deg)}
+.fix{margin-top:24px;background:var(--ops);color:#fff;border-radius:20px;padding:20px 26px;font:700 30px/1.4 var(--f-body)}
+
+/* table */
+.tbl{display:grid;gap:10px;margin-top:8px}
+.tr{display:grid;grid-template-columns:240px 290px 260px 1fr;gap:0;border-radius:18px;overflow:hidden;background:#fff}
+.tr>div{padding:20px 20px;font:500 28px/1.35 var(--f-body);color:var(--ink);border-right:2px solid #eef2e6}
+.tr>div:first-child{font:400 30px/1.2 var(--f-display);color:#fff;background:var(--ink)}
+.tr.th{background:transparent}
+.tr.th>div{font:700 24px/1 var(--f-body);color:var(--ink-2);background:transparent;border:0;padding:6px 20px}
+
+/* quiz */
+.qz{display:grid;gap:18px;margin-top:6px}
+.qi{display:grid;grid-template-columns:96px 1fr 300px;gap:22px;align-items:center;padding:20px 24px}
+.qi .n{width:96px;height:96px;border-radius:24px;background:var(--c-req);color:#fff;display:grid;place-items:center;font:400 46px/1 var(--f-display)}
+.qi .q{font:700 34px/1.4 var(--f-body);color:var(--ink)}
+.qa{position:relative;height:96px}
+.qa .wait,.qa .ans{position:absolute;inset:0;border-radius:20px;display:grid;place-items:center}
+.qa .wait{border:4px dashed var(--ana, #a5a5a5);font:400 54px/1 var(--f-display);color:#a5a5a5}
+.qa .ans{background:var(--ops);color:#fff;font:400 36px/1.1 var(--f-display);text-align:center;padding:0 10px}
+
+/* ending */
+.end{position:absolute;left:0;top:90px;width:1200px;display:grid;gap:30px}
+.end-w{display:flex;gap:30px}
+.end-w span{font:400 120px/1 var(--f-display);color:#fff;background:var(--ink);border-radius:30px;padding:30px 40px;box-shadow:0 12px 0 var(--leaf)}
+.end-w span:nth-child(2){background:var(--audit)} .end-w span:nth-child(3){background:var(--ops)}
+.end-s{font:700 52px/1.3 var(--f-body);color:var(--ink)}
+.end-c{font:500 32px/1.5 var(--f-body);color:var(--ink-2)}
+
+/* characters + subtitle */
+.chr{position:absolute;overflow:visible}
+#allan{left:1350px;top:372px;width:360px;height:508px}
+#arale{left:1665px;top:500px;width:250px;height:375px}
+.nm{position:absolute;font:400 24px/1 var(--f-display);color:#fff;border-radius:999px;padding:8px 16px;white-space:nowrap}
+#nmA{left:1452px;top:862px;background:var(--ink)}
+#nmR{left:1712px;top:862px;background:#13a58f}
+.sub{position:absolute;left:60px;right:60px;top:900px;height:150px;background:rgba(255,255,255,.95);border-radius:28px;box-shadow:0 8px 0 var(--leaf);display:grid;grid-template-columns:auto 1fr;align-items:center;gap:26px;padding:0 36px}
+.who{font:400 30px/1 var(--f-display);color:#fff;border-radius:16px;padding:14px 18px;white-space:nowrap}
+.who.A{background:var(--ink)} .who.R{background:#13a58f}
+.say{font:700 38px/1.4 var(--f-body);color:var(--ink);text-wrap:pretty}
+.prog{position:absolute;left:0;bottom:0;height:8px;background:var(--ops)}
+@media (prefers-reduced-motion: reduce){ .ring svg{transform:none} }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <h1>資訊安全保證｜5.35・5.36・8.29</h1>
+    <p>ISO/IEC 27001:2022 附錄A　Q版 Allan Lo 講師 × 助教阿拉蕾</p>
+  </div>
+  <div class="screen" id="screen">
+    <div id="stage"></div>
+    <button class="start" id="startBtn" type="button" aria-label="開始播放課程"><span>▶ 開始上課（約 11 分鐘）</span></button>
+  </div>
+  <div class="bar">
+    <button id="prev" type="button" aria-label="上一段">⏮</button>
+    <button id="play" type="button" aria-label="播放或暫停">▶</button>
+    <button id="next" type="button" aria-label="下一段">⏭</button>
+    <select id="rate" aria-label="播放速度">
+      <option value="1">1×</option><option value="1.15">1.15×</option><option value="1.3">1.3×</option><option value="0.9">0.9×</option>
+    </select>
+    <span class="time" id="time">0:00 / 0:00</span>
+    <div id="seek" role="slider" tabindex="0" aria-label="播放進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="seekFill"></div></div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <p class="note">鍵盤操作：空白鍵播放／暫停，← → 切換段落。旁白為 AI 語音合成（台灣男聲：講師；台灣女聲：助教）。案例皆為教學改編情境，非特定組織。</p>
+</div>
+<audio id="aud" preload="auto" src="__AUDIO_SRC__"></audio>
+
+<script>
+const DATA = /*__DATA__*/null;
+const CAPTURE = /[?&]capture/.test(location.search);
+if (CAPTURE) document.body.classList.add('capture');
+const stage = document.getElementById('stage');
+const $ = (h) => { const d = document.createElement('div'); d.innerHTML = h.trim(); return d.firstElementChild; };
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LENS = {ops:'ISMS作業重點', audit:'稽核查核重點', ng:'常見的缺失'};
+
+/* ---------- characters (original Q-version designs) ---------- */
+const ALLAN = `
+<svg viewBox="0 0 340 480" class="chr" id="allan" aria-label="Q版 Allan Lo 講師">
+ <ellipse cx="170" cy="470" rx="115" ry="12" fill="rgba(31,56,100,.18)"/>
+ <g id="aBody">
+  <rect x="122" y="395" width="38" height="62" rx="14" fill="#2b3754"/>
+  <rect x="180" y="395" width="38" height="62" rx="14" fill="#2b3754"/>
+  <ellipse cx="137" cy="458" rx="30" ry="13" fill="#1b1b1b"/>
+  <ellipse cx="203" cy="458" rx="30" ry="13" fill="#1b1b1b"/>
+  <g id="aArmR"><rect x="230" y="285" width="40" height="100" rx="20" fill="#2f4a7a"/><circle cx="250" cy="388" r="19" fill="#ffd7b5"/></g>
+  <path d="M95 302 Q95 266 132 260 L208 260 Q245 266 245 302 L245 402 Q245 414 233 414 L107 414 Q95 414 95 402Z" fill="#2f4a7a"/>
+  <path d="M138 260 L170 322 L202 260Z" fill="#fff"/>
+  <path d="M138 260 L170 322 L150 334 L126 268Z" fill="#253d66"/>
+  <path d="M202 260 L170 322 L190 334 L214 268Z" fill="#253d66"/>
+  <path d="M161 274 L179 274 L184 342 L170 358 L156 342Z" fill="#e0463a"/>
+  <path d="M159 262 L181 262 L177 278 L163 278Z" fill="#c2362c"/>
+  <rect x="198" y="340" width="42" height="22" rx="5" fill="#fff"/>
+  <text x="219" y="356" text-anchor="middle" font-size="12" font-weight="700" fill="#1f3864" font-family="sans-serif">ALLAN</text>
+  <g id="aArmL">
+   <rect x="86" y="388" width="8" height="92" rx="4" fill="#8a5a2b"/>
+   <circle cx="90" cy="482" r="9" fill="#e0463a"/>
+   <rect x="70" y="285" width="40" height="100" rx="20" fill="#2f4a7a"/><circle cx="90" cy="388" r="19" fill="#ffd7b5"/>
+  </g>
+  <g id="aHead">
+   <rect x="154" y="236" width="32" height="30" rx="8" fill="#f2c6a0"/>
+   <circle cx="66" cy="165" r="21" fill="#ffd7b5"/><circle cx="274" cy="165" r="21" fill="#ffd7b5"/>
+   <ellipse cx="170" cy="150" rx="110" ry="102" fill="#ffdfc4"/>
+   <path d="M60 168 Q48 70 132 44 Q210 22 266 74 Q292 106 282 170 Q272 124 246 106 Q214 128 160 112 Q118 100 94 120 Q72 140 60 168Z" fill="#2a2522"/>
+   <path d="M150 50 Q120 80 100 118 Q140 84 190 76Z" fill="#3b3430"/>
+   <path d="M66 150 Q68 130 74 122" stroke="#8d8681" stroke-width="5" fill="none" stroke-linecap="round"/>
+   <path d="M274 150 Q272 130 266 122" stroke="#8d8681" stroke-width="5" fill="none" stroke-linecap="round"/>
+   <path id="aBrowL" d="M98 122 Q122 110 148 120" stroke="#2a2522" stroke-width="9" fill="none" stroke-linecap="round"/>
+   <path id="aBrowR" d="M192 120 Q218 110 242 122" stroke="#2a2522" stroke-width="9" fill="none" stroke-linecap="round"/>
+   <ellipse id="aEyeL" cx="124" cy="156" rx="9" ry="11" fill="#2a2522"/>
+   <ellipse id="aEyeR" cx="216" cy="156" rx="9" ry="11" fill="#2a2522"/>
+   <circle cx="127" cy="152" r="3" fill="#fff"/><circle cx="219" cy="152" r="3" fill="#fff"/>
+   <rect x="88" y="130" width="70" height="52" rx="16" fill="rgba(255,255,255,.22)" stroke="#1d1d1d" stroke-width="6"/>
+   <rect x="182" y="130" width="70" height="52" rx="16" fill="rgba(255,255,255,.22)" stroke="#1d1d1d" stroke-width="6"/>
+   <path d="M158 150 Q170 141 182 150" stroke="#1d1d1d" stroke-width="6" fill="none"/>
+   <path d="M88 146 L66 140 M252 146 L274 140" stroke="#1d1d1d" stroke-width="5"/>
+   <path d="M166 174 Q170 188 176 184" stroke="#d99a76" stroke-width="4" fill="none" stroke-linecap="round"/>
+   <circle cx="100" cy="198" r="15" fill="#ff9c8a" opacity=".45"/><circle cx="240" cy="198" r="15" fill="#ff9c8a" opacity=".45"/>
+   <path id="aMouthC" d="M146 206 Q170 226 194 206" stroke="#7a2e1e" stroke-width="6" fill="none" stroke-linecap="round"/>
+   <g id="aMouthO"><ellipse id="aMo" cx="170" cy="212" rx="18" ry="12" fill="#8b2b23"/><ellipse id="aTo" cx="170" cy="218" rx="10" ry="5" fill="#ef7f74"/></g>
+  </g>
+ </g>
+</svg>`;
+const ARALE = `
+<svg viewBox="0 0 260 390" class="chr" id="arale" aria-label="助教阿拉蕾（原創Q版機器人少女）">
+ <ellipse cx="130" cy="380" rx="80" ry="10" fill="rgba(31,56,100,.18)"/>
+ <g id="rBody">
+  <rect x="98" y="318" width="26" height="46" rx="10" fill="#fff"/><rect x="136" y="318" width="26" height="46" rx="10" fill="#fff"/>
+  <ellipse cx="110" cy="368" rx="22" ry="11" fill="#e0463a"/><ellipse cx="150" cy="368" rx="22" ry="11" fill="#e0463a"/>
+  <g id="rArmL"><rect x="52" y="236" width="30" height="72" rx="15" fill="#ff7b5c"/><circle cx="66" cy="310" r="15" fill="#ffe0c6"/></g>
+  <g id="rArmR"><rect x="178" y="236" width="30" height="72" rx="15" fill="#ff7b5c"/><circle cx="194" cy="310" r="15" fill="#ffe0c6"/></g>
+  <path d="M78 250 Q78 228 104 226 L156 226 Q182 228 182 250 L190 330 L70 330Z" fill="#ff7b5c"/>
+  <path d="M86 262 L174 262 L184 332 L76 332Z" fill="#ffc93c"/>
+  <rect x="96" y="246" width="12" height="24" rx="4" fill="#ffc93c"/><rect x="152" y="246" width="12" height="24" rx="4" fill="#ffc93c"/>
+  <rect x="106" y="280" width="48" height="30" rx="8" fill="#fff"/>
+  <text x="130" y="302" text-anchor="middle" font-size="18" font-weight="900" fill="#13a58f" font-family="sans-serif">助教</text>
+  <g id="rHead">
+   <line x1="130" y1="56" x2="130" y2="14" stroke="#555" stroke-width="5"/>
+   <path id="rStar" d="M130 -6 L136 8 L151 9 L139 18 L143 33 L130 25 L117 33 L121 18 L109 9 L124 8Z" fill="#ffd400" stroke="#e0a800" stroke-width="2"/>
+   <circle cx="56" cy="78" r="30" fill="#2fbfa8"/><circle cx="204" cy="78" r="30" fill="#2fbfa8"/>
+   <ellipse cx="130" cy="146" rx="94" ry="88" fill="#ffe4cc"/>
+   <path d="M38 150 Q30 60 130 54 Q230 60 222 150 Q214 112 186 100 Q170 124 130 112 Q92 124 74 100 Q46 112 38 150Z" fill="#2fbfa8"/>
+   <path d="M38 150 Q36 190 50 214 Q46 176 52 152Z" fill="#2fbfa8"/><path d="M222 150 Q224 190 210 214 Q214 176 208 152Z" fill="#2fbfa8"/>
+   <rect x="36" y="128" width="20" height="40" rx="8" fill="#9aa4b1"/><rect x="204" y="128" width="20" height="40" rx="8" fill="#9aa4b1"/>
+   <g id="rEyes">
+    <ellipse id="rEyeL" cx="96" cy="152" rx="20" ry="25" fill="#24304a"/>
+    <ellipse id="rEyeR" cx="164" cy="152" rx="20" ry="25" fill="#24304a"/>
+    <circle cx="102" cy="142" r="7" fill="#fff"/><circle cx="170" cy="142" r="7" fill="#fff"/>
+    <circle cx="90" cy="162" r="3.5" fill="#fff"/><circle cx="158" cy="162" r="3.5" fill="#fff"/>
+   </g>
+   <circle cx="72" cy="190" r="14" fill="#ff8fa3" opacity=".55"/><circle cx="188" cy="190" r="14" fill="#ff8fa3" opacity=".55"/>
+   <path id="rMouthC" d="M116 196 Q130 208 144 196" stroke="#8b2b23" stroke-width="5" fill="none" stroke-linecap="round"/>
+   <path id="rMouthO" d="M114 194 L146 194 Q146 220 130 220 Q114 220 114 194Z" fill="#8b2b23"/>
+  </g>
+ </g>
+</svg>`;
+
+/* ---------- scene builders ---------- */
+function anim(node, t, a = 'rise', dur) {
+  node.classList.add('it', 'a-' + a);
+  node.dataset.t = t; if (dur) node.dataset.d = dur;
+  return node;
+}
+function ringSVG(color) {
+  return `<svg viewBox="0 0 150 150"><path d="M75 12 A63 63 0 1 1 18 48" fill="none" stroke="${color}" stroke-width="18" stroke-linecap="round"/><path d="M4 40 L36 34 L22 66Z" fill="${color}"/></svg>`;
+}
+function cycle(box, t, opt = {}) {
+  const names = ['需求','分析','開發','測試','部署'];
+  const cols = ['--c-req','--c-ana','--c-dev','--c-test','--c-dep'];
+  const gap = opt.gap || 108, x0 = opt.x0 || 10, dx = opt.dx || 70, step = opt.step || 0.22;
+  names.forEach((n, i) => {
+    const r = $(`<div class="ring" style="left:${x0 + (i % 2) * dx}px;top:${i * gap}px">${ringSVG(`var(${cols[i]})`)}<b>${n}</b></div>`);
+    box.appendChild(anim(r, t + i * step, 'pop'));
+  });
+}
+const B = {
+  title(sc, el) {
+    const w = $(`<div class="ttl-wrap"></div>`);
+    const ttl = $(`<div class="ttl"></div>`);
+    [...sc.title].forEach((c, i) => ttl.appendChild(anim($(`<span>${esc(c)}</span>`), sc.t0 + 0.25 + i * 0.12, 'pop')));
+    w.appendChild(ttl);
+    w.appendChild(anim($(`<div class="ttl-en">${esc(sc.subtitle)}</div>`), sc.t0 + 1.1, 'wipe', 0.9));
+    const row = $(`<div class="ctl-row"></div>`);
+    sc.items.filter(x => !x.kind).forEach((x, i) => {
+      const [no, ...rest] = x.text.split(' ');
+      row.appendChild(anim($(`<div class="ctl"><em>${esc(no)}</em>${esc(rest.join(' '))}</div>`), x.t + i * 0.35, 'slide'));
+    });
+    w.appendChild(row);
+    const lr = $(`<div class="lens-row"></div>`), lk = ['ops','audit','ng'];
+    sc.items.filter(x => x.kind === 'lens').forEach((x, i) => lr.appendChild(anim($(`<span class="lens ${lk[i]}">${esc(x.text)}</span>`), x.t, 'pop')));
+    w.appendChild(lr);
+    el.appendChild(w);
+  },
+  map(sc, el) {
+    const T = Object.fromEntries(sc.items.map(x => [x.key, x.t]));
+    const f = anim($(`<div class="field"><div class="field-t">5.36 資訊安全政策、規則及<br>標準之遵循性</div></div>`), T.field, 'pop');
+    el.appendChild(f);
+    const seeds = $(`<div class="it a-rise" style="position:absolute;left:0;top:0;width:800px;height:610px"></div>`);
+    seeds.dataset.t = T.seeds;
+    seeds.innerHTML = `
+      <svg class="arrows" width="800" height="610" viewBox="0 0 800 610">
+       <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#a9d18e"/></marker></defs>
+       <g stroke="#a9d18e" stroke-width="16" stroke-linecap="round" marker-end="url(#ah)">
+        <line x1="150" y1="120" x2="210" y2="168"/><line x1="660" y1="128" x2="610" y2="168"/>
+        <line x1="210" y1="500" x2="260" y2="440"/><line x1="610" y1="490" x2="560" y2="440"/></g></svg>
+      <div class="seed" style="left:40px;top:40px">資安<br>政策</div>
+      <div class="seed" style="left:640px;top:40px">規則</div>
+      <div class="seed" style="left:110px;top:460px">標準</div>
+      <div class="seed" style="left:600px;top:452px">主題<br>特定<br>政策</div>`;
+    el.appendChild(seeds);
+    const rv = anim($(`<div class="rv"><div class="rv-t">5.35 資訊安全之獨立審查</div></div>`), T.review, 'pop');
+    const tri = $(`<div class="triad"></div>`);
+    [['合宜性','suitability'],['適切性','adequacy'],['有效性','effectiveness']].forEach((a, i) =>
+      tri.appendChild(anim($(`<div class="tc">${a[0]}<small>${a[1]}</small></div>`), T.triad + i * 0.3, 'pop')));
+    rv.appendChild(tri); el.appendChild(rv);
+    const cy = $(`<div class="cyc"></div>`);
+    cycle(cy, T.cycle, {gap: 112, x0: 10, dx: 80});
+    cy.appendChild(anim($(`<div class="vline"></div>`), T.cycle + 0.6, 'rise'));
+    cy.appendChild(anim($(`<div class="vtxt"><span style="font-size:22px">8.29</span><br>開<br>發<br>及<br>驗<br>收<br>中<br>之<br>安<br>全<br>測<br>試</div>`), T.cycle + 0.8, 'rise'));
+    el.appendChild(cy);
+    const an = $(`<div class="analogy"></div>`);
+    [['5.36','自己定期量體重','var(--ops)'],['5.35','醫院健康檢查','var(--ink)'],['8.29','出生前的產檢','var(--c-req)']].forEach((a, i) =>
+      an.appendChild(anim($(`<div class="an"><i style="background:${a[2]}">${a[0]}</i>${a[1]}</div>`), T.analogy + 0.8 + i * 0.9, 'pop')));
+    el.appendChild(an);
+  },
+  points(sc, el) {
+    el.appendChild(anim($(`<div class="quote"><b>控制措施</b>${esc(sc.quote)}</div>`), sc.t0 + 0.3, 'rise'));
+    const rows = $(`<div class="rows" style="margin-top:22px"></div>`);
+    sc.items.forEach(x => rows.appendChild(anim($(`<div class="card row hl"><div class="k">${esc(x.head)}</div><div class="v">${esc(x.text)}</div></div>`), x.t, 'slide')));
+    el.appendChild(rows);
+  },
+  triad(sc, el) {
+    el.appendChild(anim($(`<div class="h2">${esc(sc.title)}</div>`), sc.t0 + 0.3, 'rise'));
+    const g = $(`<div class="tri3"></div>`);
+    sc.items.filter(x => !x.kind).forEach(x => {
+      const c = $(`<div class="tcol"></div>`);
+      c.appendChild(anim($(`<div class="tbig">${esc(x.name)}<small>${esc(x.en)}</small></div>`), x.t, 'pop'));
+      c.appendChild(anim($(`<div class="tq">${esc(x.q)}</div>`), x.t + 0.5, 'rise'));
+      c.appendChild(anim($(`<div class="tex">${esc(x.ex)}</div>`), x.t + 1.2, 'rise'));
+      g.appendChild(c);
+    });
+    el.appendChild(g);
+    const p = sc.items.find(x => x.kind === 'punch');
+    el.appendChild(anim($(`<div class="punch">${esc(p.text)}</div>`), p.t, 'pop'));
+  },
+  audit(sc, el) {
+    el.appendChild(anim($(`<div class="h2">${esc(sc.title)}</div>`), sc.t0 + 0.3, 'rise'));
+    const rows = $(`<div class="rows"></div>`);
+    sc.items.forEach(x => {
+      const r = $(`<div class="arow"></div>`);
+      r.appendChild(anim($(`<div class="qb hl">${esc(x.q)}</div>`), x.t, 'slide'));
+      r.appendChild(anim($(`<div class="ev">${esc(x.ev)}</div>`), x.t + 0.9, 'rise'));
+      rows.appendChild(r);
+    });
+    el.appendChild(rows);
+  },
+  case(sc, el) {
+    const c = anim($(`<div class="case"><div class="case-h"><b>管理實務案例</b>${esc(sc.org)}</div></div>`), sc.t0 + 0.2, 'pop');
+    c.insertBefore($(`<div class="h2" style="margin:0">${esc(sc.title)}</div>`), c.firstChild.nextSibling);
+    const col = {'情境':'var(--ink-2)','稽核發現':'var(--alarm)','改善作法':'var(--ops)'};
+    sc.items.forEach(x => c.appendChild(anim($(`<div class="sec"><div class="k" style="background:${col[x.label]}">${esc(x.label)}</div><div class="v">${esc(x.text)}</div></div>`), x.t, 'rise')));
+    const st = anim($(`<div class="stamp" style="right:40px;top:40px">缺乏獨立性！</div>`), sc.items[1].t + 2.2, 'stamp', 0.35);
+    c.appendChild(st);
+    el.appendChild(c);
+  },
+  faults(sc, el) {
+    el.appendChild(anim($(`<div class="h2"><span class="siren"></span>${esc(sc.title)}</div>`), sc.t0 + 0.2, 'pop'));
+    const rows = $(`<div class="rows"></div>`);
+    sc.items.forEach((x, i) => rows.appendChild(anim($(`<div class="card flt hl"><div class="n">${i + 1}</div><div class="v">${esc(x.text)}</div></div>`), x.t, 'slide')));
+    el.appendChild(rows);
+  },
+  comply(sc, el) {
+    const T = Object.fromEntries(sc.items.map(x => [x.key, x.t]));
+    el.appendChild(anim($(`<div class="quote"><b>控制措施</b>${esc(sc.quote)}</div>`), sc.t0 + 0.3, 'rise'));
+    const g = $(`<div class="cgrid"></div>`);
+    const py = $(`<div class="pyr"></div>`);
+    ['資安政策','主題特定政策','規則','標準'].forEach((n, i) => py.appendChild(anim($(`<div class="pl">${n}</div>`), T.pyramid + 1.5 + i * 0.6, 'pop')));
+    py.appendChild(anim($(`<div class="pyr-cap">由上而下：方向 → 主題 → 作法 → 規格<br>每一層都要「做得到、查得到」</div>`), T.pyramid + 4.2, 'rise'));
+    g.appendChild(py);
+    const col = $(`<div class="ccol"></div>`);
+    col.appendChild(anim($(`<div class="card own hl"><b>各部門主管</b>：確認自己管轄範圍有遵循<br><b>資安單位</b>：協助、彙整、追蹤</div>`), T.owner, 'slide'));
+    const m = $(`<div class="meth"></div>`);
+    m.appendChild(anim($(`<div class="card m hl"><div class="k">管理面｜主管自查</div><div class="v">定期檢查表、抽樣訪談、紀錄佐證</div></div>`), T.methods + 0.6, 'pop'));
+    m.appendChild(anim($(`<div class="card m hl"><div class="k">技術面｜遵循性檢查</div><div class="v">組態掃描比對 GCB、弱點掃描、自動化工具</div></div>`), T.methods + 3.2, 'pop'));
+    col.appendChild(m);
+    const lp = $(`<div class="loop"></div>`);
+    ['找出原因','評估行動','實施矯正','確認有效'].forEach((n, i) => lp.appendChild(anim($(`<div class="st"><i>STEP ${i + 1}</i>${n}</div>`), T.loop + 1.4 + i * 1.3, 'pop')));
+    col.appendChild(lp);
+    g.appendChild(col); el.appendChild(g);
+  },
+  versus(sc, el) {
+    const T = Object.fromEntries(sc.items.map(x => [x.key, x.t]));
+    el.appendChild(anim($(`<div class="h2">${esc(sc.title)}</div>`), sc.t0 + 0.3, 'rise'));
+    const vs = $(`<div class="vs"></div>`);
+    vs.appendChild(anim($(`<div class="doc"><div class="k"><i>政策</i>密碼管理規範 v3.2 §4.1</div><div class="v">密碼長度<mark>至少 12 碼</mark>，<br>且須具備複雜度</div></div>`), T.policy, 'slide'));
+    vs.appendChild(anim($(`<div class="neq">≠</div>`), T.system + 2.6, 'pop'));
+    const w = anim($(`<div class="win"><div class="tb"><s></s><s></s><s></s>&nbsp;群組原則管理編輯器｜密碼原則</div><div class="bd">強制執行密碼歷程記錄：24<br>密碼必須符合複雜性需求：已啟用<br>最小密碼長度：<span class="bad">8 個字元</span></div></div>`), T.system, 'pop');
+    w.appendChild(anim($(`<div class="stamp" style="right:-24px;top:-40px;font-size:40px">被抓包！</div>`), T.stamp + 0.3, 'stamp', 0.35));
+    vs.appendChild(w); el.appendChild(vs);
+    const r2 = $(`<div class="vs2"></div>`);
+    const ck = anim($(`<div class="card chk"><h4>第3季 遵循性檢查表（資訊部）</h4><table>
+      <tr><td>密碼原則符合政策</td><td>✔ 符合</td></tr><tr><td>USB 儲存裝置管控</td><td>✔ 符合</td></tr>
+      <tr><td>螢幕保護鎖定 10 分鐘</td><td>✔ 符合</td></tr><tr><td>特權帳號定期審查</td><td>✔ 符合</td></tr></table></div>`), T.checklist, 'rise');
+    ck.appendChild(anim($(`<div class="stamp" style="right:16px;bottom:-26px;font-size:36px">只是紙上作業</div>`), T.checklist + 4.5, 'stamp', 0.35));
+    r2.appendChild(ck);
+    const fp = $(`<div class="fp"></div>`);
+    fp.appendChild(anim($(`<h4>稽核查核重點</h4>`), T.points, 'rise'));
+    ['主管有沒有定期檢查？','有沒有技術工具驗證？','不符合有沒有原因分析？','抽樣比對：政策 ⇄ 實際設定'].forEach((n, i) =>
+      fp.appendChild(anim($(`<div class="fpi">${n}</div>`), T.points + 1.4 + i * 1.5, 'slide')));
+    r2.appendChild(fp); el.appendChild(r2);
+  },
+  sdlc(sc, el) {
+    const T = Object.fromEntries(sc.items.map(x => [x.key, x]));
+    el.appendChild(anim($(`<div class="quote"><b>控制措施</b>${esc(sc.quote)}</div>`), sc.t0 + 0.3, 'rise'));
+    const g = $(`<div class="sgrid"></div>`);
+    const cy = $(`<div class="scyc"></div>`);
+    cycle(cy, T.cycle.t, {gap: 104, x0: 20, dx: 120, step: 0.5});
+    g.appendChild(cy);
+    const r = $(`<div></div>`);
+    const tt = $(`<div class="tt"></div>`);
+    ['t1','t2','t3','t4'].forEach(k => tt.appendChild(anim($(`<div class="card ttc hl"><div class="k">${esc(T[k].head)}</div><div class="v">${esc(T[k].text)}</div></div>`), T[k].t, 'pop')));
+    r.appendChild(tt);
+    r.appendChild(anim($(`<div class="strip plan hl">${esc(T.plan.text)}</div>`), T.plan.t, 'rise'));
+    r.appendChild(anim($(`<div class="strip tw hl">${esc(T.tw.text)}</div>`), T.tw.t, 'rise'));
+    g.appendChild(r); el.appendChild(g);
+  },
+  story(sc, el) {
+    const T = Object.fromEntries(sc.items.map(x => [x.key, x]));
+    el.appendChild(anim($(`<div class="h2">${esc(sc.title)}</div>`), sc.t0 + 0.3, 'rise'));
+    el.appendChild(anim($(`<div class="org"><b>管理實務案例</b>${esc(sc.org)}</div>`), sc.t0 + 0.6, 'rise'));
+    const tl = $(`<div class="tl"></div>`);
+    ['s1','s2','s3'].forEach(k => {
+      const n = anim($(`<div class="card tls ${k !== 's1' ? 'bad' : ''}"><div class="k">${esc(T[k].label)}</div><div class="v">${esc(T[k].text)}</div></div>`), T[k].t, 'pop');
+      if (k === 's3') n.appendChild(anim($(`<div class="stamp" style="right:-10px;top:-26px;font-size:38px">版本不符</div>`), T.s3.t + 2.2, 'stamp', 0.35));
+      tl.appendChild(n);
+    });
+    el.appendChild(tl);
+    const cks = $(`<div class="cks"></div>`);
+    ['c1','c2','c3','c4'].forEach(k => cks.appendChild(anim($(`<div class="card ck hl"><i></i>${esc(T[k].text)}</div>`), T[k].t, 'slide')));
+    el.appendChild(cks);
+    el.appendChild(anim($(`<div class="fix">${esc(T.fix.text)}</div>`), T.fix.t, 'rise'));
+  },
+  table(sc, el) {
+    el.appendChild(anim($(`<div class="h2">${esc(sc.title)}</div>`), sc.t0 + 0.3, 'rise'));
+    const t = $(`<div class="tbl"></div>`);
+    t.appendChild(anim($(`<div class="tr th">${sc.cols.map(c => `<div>${esc(c)}</div>`).join('')}</div>`), sc.t0 + 0.6, 'rise'));
+    sc.items.filter(x => x.row).forEach(x => t.appendChild(anim($(`<div class="tr hl">${x.row.map(c => `<div>${esc(c)}</div>`).join('')}</div>`), x.t, 'slide')));
+    el.appendChild(t);
+    const p = sc.items.find(x => x.kind === 'punch');
+    el.appendChild(anim($(`<div class="punch">${esc(p.text)}</div>`), p.t, 'pop'));
+  },
+  quiz(sc, el) {
+    el.appendChild(anim($(`<div class="h2">${esc(sc.title)}</div>`), sc.t0 + 0.2, 'pop'));
+    const q = $(`<div class="qz"></div>`);
+    sc.items.forEach((x, i) => {
+      const n = anim($(`<div class="card qi hl"><div class="n">Q${i + 1}</div><div class="q">${esc(x.q)}</div><div class="qa"><div class="wait">？</div></div></div>`), x.t, 'slide');
+      n.querySelector('.qa').appendChild(anim($(`<div class="ans">✔ ${esc(x.ans)}</div>`), x.tAns + 0.3, 'pop'));
+      q.appendChild(n);
+    });
+    el.appendChild(q);
+  },
+  ending(sc, el) {
+    const e = $(`<div class="end"></div>`);
+    const w = $(`<div class="end-w"></div>`);
+    ['有做','做對','有效'].forEach((s, i) => w.appendChild(anim($(`<span>${s}</span>`), sc.lines[0].t0 + 4.6 + i * 0.7, 'stamp', 0.4)));
+    e.appendChild(w);
+    e.appendChild(anim($(`<div class="end-s">${esc(sc.subtitle)}</div>`), sc.lines[0].t0 + 1.5, 'rise'));
+    e.appendChild(anim($(`<div class="end-c">講師｜Allan Lo（ISMS／PIMS 輔導顧問・驗證稽核員）<br>助教｜阿拉蕾　　下一堂課見！</div>`), sc.lines[1].t0, 'rise'));
+    el.appendChild(e);
+  },
+};
+
+/* ---------- build stage ---------- */
+const scenes = DATA.scenes, TOTAL = DATA.duration;
+const bubs = [[90,120,120],[1250,160,70],[1500,90,110],[1820,300,60],[40,700,90],[1180,780,50],[760,60,46],[1600,420,80]];
+bubs.forEach(([x, y, r], i) => stage.appendChild($(`<div class="bub" data-i="${i}" style="left:${x}px;top:${y}px;width:${r}px;height:${r}px"></div>`)));
+const hdr = $(`<div class="hdr"><span class="tag" id="tag"></span><span class="lens" id="lens"></span><span class="brand">資訊安全保證</span></div>`);
+stage.appendChild(hdr);
+const board = $(`<div class="board"></div>`); stage.appendChild(board);
+const sceneEls = scenes.map(sc => { const el = $(`<div class="scene"></div>`); B[sc.type](sc, el); board.appendChild(el); return el; });
+stage.insertAdjacentHTML('beforeend', ALLAN + ARALE + `<span class="nm" id="nmA">Allan Lo 講師</span><span class="nm" id="nmR">阿拉蕾 助教</span>
+ <div class="sub" id="sub"><span class="who A" id="who">Allan Lo</span><div class="say" id="say"></div></div><div class="prog" id="prog"></div>`);
+const sceneItems = sceneEls.map(el => [...el.querySelectorAll('.it')].map(n => ({n, t: +n.dataset.t, d: +(n.dataset.d || 0), a: [...n.classList].find(c => c.startsWith('a-')), last: -1})));
+const sceneHl = sceneEls.map(el => [...el.querySelectorAll('.hl')]);
+const G = id => document.getElementById(id);
+const E = {tag: G('tag'), lens: G('lens'), who: G('who'), say: G('say'), sub: G('sub'), prog: G('prog'),
+  aBody: G('aBody'), aHead: G('aHead'), aArmL: G('aArmL'), aArmR: G('aArmR'), aEyeL: G('aEyeL'), aEyeR: G('aEyeR'), aMC: G('aMouthC'), aMO: G('aMouthO'), aMo: G('aMo'), aTo: G('aTo'), aBrowL: G('aBrowL'), aBrowR: G('aBrowR'),
+  rBody: G('rBody'), rHead: G('rHead'), rArmL: G('rArmL'), rArmR: G('rArmR'), rEyes: G('rEyes'), rMC: G('rMouthC'), rMO: G('rMouthO'), rStar: G('rStar'), nmA: G('nmA'), nmR: G('nmR')};
+const bubEls = [...stage.querySelectorAll('.bub')];
+
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const easeOut = p => 1 - Math.pow(1 - p, 3);
+const easeBack = p => { const c = 1.9; return p <= 0 ? 0 : 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+const DUR = {'a-rise': .6, 'a-slide': .55, 'a-pop': .55, 'a-stamp': .35, 'a-wipe': .9};
+
+let curScene = -1, lastLineKey = '';
+function sceneAt(t) { for (let i = scenes.length - 1; i >= 0; i--) if (t >= scenes[i].t0) return i; return 0; }
+function blink(t, period, off) { const ph = (t + off) % period; return ph < 0.13 ? 0.12 : 1; }
+
+function render(t) {
+  t = clamp(t, 0, TOTAL);
+  const si = sceneAt(t), sc = scenes[si];
+  stage.style.setProperty('--t', t.toFixed(3));
+  if (si !== curScene) {
+    sceneEls.forEach((e, i) => e.classList.toggle('on', i === si));
+    E.tag.textContent = sc.tag;
+    E.lens.hidden = !sc.lens; if (sc.lens) { E.lens.className = 'lens ' + sc.lens; E.lens.textContent = LENS[sc.lens]; }
+    curScene = si; onSceneChange(si);
+  }
+  // scene entrance
+  const se = easeOut(clamp((t - sc.t0) / 0.5));
+  sceneEls[si].style.opacity = se; sceneEls[si].style.transform = `translateX(${(1 - se) * 50}px)`;
+  // items
+  for (const it of sceneItems[si]) {
+    const p = clamp((t - it.t) / (it.d || DUR[it.a] || .6));
+    const key = Math.round(p * 1000);
+    if (key === it.last) continue; it.last = key;
+    it.n.style.setProperty('--p', easeOut(p).toFixed(4));
+    it.n.style.setProperty('--b', easeBack(p).toFixed(4));
+  }
+  // highlight the item currently being explained
+  let cur = null;
+  for (const h of sceneHl[si]) { const ht = +h.dataset.t; if (ht <= t) cur = h; }
+  const lastLine = sc.lines[sc.lines.length - 1];
+  for (const h of sceneHl[si]) h.classList.toggle('cur', h === cur && t < lastLine.t1 + 0.2);
+  // siren blink
+  stage.style.setProperty('--blink', (0.5 + 0.5 * Math.sin(t * 9)).toFixed(3));
+  // subtitle + speaker
+  let line = null;
+  for (const ln of sc.lines) if (t >= ln.t0 - 0.15 && t <= ln.t1 + 0.4) line = ln;
+  const speaking = line && t >= line.t0 && t <= line.t1 ? line.spk : null;
+  const key = line ? line.t0 : 'none';
+  if (key !== lastLineKey) {
+    lastLineKey = key;
+    if (line) { E.who.className = 'who ' + line.spk; E.who.textContent = line.spk === 'A' ? 'Allan Lo 講師' : '阿拉蕾 助教'; E.say.textContent = line.text; }
+  }
+  E.sub.style.opacity = line ? 1 : 0.0;
+  E.prog.style.width = (t / TOTAL * 1920).toFixed(1) + 'px';
+  // mouth amplitude from audio envelope
+  const env = DATA.env, k = Math.floor(t * DATA.envHz);
+  const amp = speaking ? (+(env[k] || 0)) / 9 : 0;
+  // ---- Allan ----
+  const aTalk = speaking === 'A';
+  const aBob = Math.sin(t * 2.1) * 4 + (aTalk ? -Math.abs(Math.sin(t * 5.2)) * 5 : 0);
+  E.aBody.setAttribute('transform', `translate(0 ${aBob.toFixed(2)})`);
+  E.aHead.setAttribute('transform', `rotate(${(Math.sin(t * 1.3) * 2.5 + (aTalk ? Math.sin(t * 3.1) * 2.5 : 0)).toFixed(2)} 170 240)`);
+  const armA = aTalk ? 100 + Math.sin(t * 2.3) * 16 : 14 + Math.sin(t * 1.4) * 3;
+  E.aArmL.setAttribute('transform', `rotate(${armA.toFixed(1)} 90 295)`);
+  E.aArmR.setAttribute('transform', `rotate(${(-8 + Math.sin(t * 1.7) * 3).toFixed(1)} 250 295)`);
+  const ab = blink(t, 3.7, 0.4);
+  E.aEyeL.setAttribute('ry', 11 * ab); E.aEyeR.setAttribute('ry', 11 * ab);
+  const lift = aTalk ? Math.max(0, Math.sin(t * 2.7)) * 5 : 0;
+  E.aBrowL.setAttribute('transform', `translate(0 ${-lift.toFixed(1)})`); E.aBrowR.setAttribute('transform', `translate(0 ${-lift.toFixed(1)})`);
+  const aOpen = aTalk && amp > 0.08;
+  E.aMC.style.display = aOpen ? 'none' : ''; E.aMO.style.display = aOpen ? '' : 'none';
+  if (aOpen) { E.aMo.setAttribute('ry', (4 + 15 * amp).toFixed(1)); E.aMo.setAttribute('rx', (15 + 6 * amp).toFixed(1)); E.aTo.setAttribute('cy', (212 + 9 * amp).toFixed(1)); }
+  // ---- Arale ----
+  const rTalk = speaking === 'R';
+  const hop = rTalk ? -Math.abs(Math.sin(t * 6.5)) * 16 : Math.sin(t * 2.6 + 1) * 3;
+  E.rBody.setAttribute('transform', `translate(0 ${hop.toFixed(2)})`);
+  E.rHead.setAttribute('transform', `rotate(${(Math.sin(t * 1.9 + 2) * 4).toFixed(2)} 130 230)`);
+  E.rArmL.setAttribute('transform', `rotate(${(rTalk ? 60 + Math.sin(t * 7) * 25 : 8 + Math.sin(t * 2) * 4).toFixed(1)} 67 245)`);
+  E.rArmR.setAttribute('transform', `rotate(${(rTalk ? -60 - Math.sin(t * 7 + 1) * 25 : -8 - Math.sin(t * 2) * 4).toFixed(1)} 193 245)`);
+  E.rEyes.setAttribute('transform', `translate(0 ${(152 * (1 - blink(t, 4.3, 1.9))).toFixed(1)}) scale(1 ${blink(t, 4.3, 1.9)})`);
+  const rOpen = rTalk && amp > 0.08;
+  E.rMC.style.display = rOpen ? 'none' : ''; E.rMO.style.display = rOpen ? '' : 'none';
+  if (rOpen) E.rMO.setAttribute('transform', `translate(0 ${(194 * (1 - (0.35 + 0.8 * amp))).toFixed(1)}) scale(1 ${(0.35 + 0.8 * amp).toFixed(2)})`);
+  const glow = rTalk ? 0.6 + 0.4 * Math.abs(Math.sin(t * 8)) : 0.85;
+  E.rStar.setAttribute('opacity', glow.toFixed(2));
+  E.nmA.style.opacity = aTalk ? 1 : 0.55; E.nmR.style.opacity = rTalk ? 1 : 0.55;
+  // ambient bubbles
+  bubEls.forEach((b, i) => { b.style.transform = `translate(${(Math.sin(t * .3 + i) * 14).toFixed(1)}px, ${(Math.cos(t * .25 + i * 2) * 18).toFixed(1)}px)`; });
+}
+window.__render = render;
+window.__duration = TOTAL;
+window.__scenes = scenes.map(s => ({t0: s.t0, t1: s.t1, id: s.id, lines: s.lines.map(l => [l.t0, l.t1])}));
+
+/* ---------- player chrome ---------- */
+const aud = document.getElementById('aud');
+const screenEl = document.getElementById('screen');
+function fit() { stage.style.transform = `scale(${screenEl.clientWidth / 1920})`; }
+addEventListener('resize', fit); fit();
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const chips = document.getElementById('chips'), seek = document.getElementById('seek');
+scenes.forEach((sc, i) => {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = sc.chip; b.onclick = () => go(sc.t0 + 0.01, true); chips.appendChild(b);
+  if (i) { const tk = document.createElement('span'); tk.className = 'tick'; tk.style.left = (sc.t0 / TOTAL * 100) + '%'; seek.appendChild(tk); }
+});
+function onSceneChange(i) { [...chips.children].forEach((c, k) => c.classList.toggle('on', k === i)); }
+let playing = false, previewT = scenes[0].t1 - 0.6;
+function now() { return playing || aud.currentTime > 0 ? aud.currentTime : previewT; }
+function ui() {
+  const t = now();
+  document.getElementById('time').textContent = `${fmt(t)} / ${fmt(TOTAL)}`;
+  document.getElementById('seekFill').style.width = (t / TOTAL * 100) + '%';
+  seek.setAttribute('aria-valuenow', Math.round(t / TOTAL * 100));
+  document.getElementById('play').textContent = playing ? '❚❚' : '▶';
+}
+function loop() { render(now()); ui(); if (playing) requestAnimationFrame(loop); }
+function play() { document.getElementById('startBtn').hidden = true; aud.play().then(() => { playing = true; loop(); }).catch(() => {}); }
+function pause() { aud.pause(); playing = false; loop(); }
+function go(t, autoplay) { aud.currentTime = clamp(t, 0, TOTAL - 0.05); if (autoplay && !playing) play(); else loop(); }
+aud.addEventListener('ended', () => { playing = false; loop(); });
+document.getElementById('startBtn').onclick = () => go(0, true);
+document.getElementById('play').onclick = () => playing ? pause() : (aud.currentTime === 0 ? go(0, true) : play());
+document.getElementById('prev').onclick = () => { const i = sceneAt(now()); go(scenes[Math.max(0, now() - scenes[i].t0 > 2 ? i : i - 1)].t0 + 0.01, playing); };
+document.getElementById('next').onclick = () => { const i = sceneAt(now()); go(scenes[Math.min(scenes.length - 1, i + 1)].t0 + 0.01, playing); };
+document.getElementById('rate').onchange = e => { aud.playbackRate = +e.target.value; };
+seek.addEventListener('click', e => { const r = seek.getBoundingClientRect(); go((e.clientX - r.left) / r.width * TOTAL, playing); document.getElementById('startBtn').hidden = true; });
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'SELECT') return;
+  if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
+  else if (e.code === 'ArrowRight') document.getElementById('next').click();
+  else if (e.code === 'ArrowLeft') document.getElementById('prev').click();
+});
+if (CAPTURE) render(0); else loop();
+</script>
