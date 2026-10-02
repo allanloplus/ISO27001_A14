@@ -4,7 +4,7 @@ import { createRequire } from 'module';
 const { chromium } = createRequire(import.meta.url)('playwright');
 import path from 'path';
 const [out, mode = 'end'] = process.argv.slice(2);
-const file = 'file://' + path.resolve('output/資訊安全保證_動畫簡報.html') + '?capture';
+const file = 'file://' + path.resolve('index.html') + '?capture';
 import { routeFonts } from './fontproxy.mjs';
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });

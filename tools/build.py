@@ -178,7 +178,7 @@ def main():
     # standalone version: open directly in any browser, works offline (fonts fall back)
     head = ('<!doctype html>\n<html lang="zh-Hant">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n</head>\n<body>\n')
-    out = os.path.join(OUT, "資訊安全保證_動畫簡報.html")
+    out = os.path.join(ROOT, "index.html")
     open(out, "w", encoding="utf-8").write(head + html + "\n</body>\n</html>\n")
     print("Wrote", out, f"{os.path.getsize(out)/1e6:.1f} MB")
 

@@ -18,7 +18,7 @@
 | 檔案 | 用途 |
 |---|---|
 | `output/資訊安全保證_動畫簡報.mp4` | 1080p 影片，可直接上課播放或上傳平台 |
-| `output/資訊安全保證_動畫簡報.html` | 互動播放器（單一檔案，含旁白），可跳段落、調速度 |
+| `index.html` | 互動播放器（單一檔案，含旁白），可跳段落、調速度；開啟 GitHub Pages 即可線上播放 |
 
 ## 修改內容
 
@@ -27,7 +27,7 @@
 
 ```bash
 pip install edge-tts
-python3 tools/build.py                       # 產生語音、時間軸、HTML 播放器
+python3 tools/build.py                       # 產生語音、時間軸、index.html 播放器
 NODE_PATH=/opt/node-tools/node_modules \
   node tools/render_video.mjs 20 3 1920      # 渲染 MP4（fps、平行數、寬度）
 node tools/snap.mjs <資料夾> end              # 擷取每段結尾畫面檢查版面

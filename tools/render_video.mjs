@@ -8,7 +8,7 @@ import { routeFonts } from './fontproxy.mjs';
 const { chromium } = createRequire(import.meta.url)('playwright');
 
 const FPS = +(process.argv[2] || 20), WORKERS = +(process.argv[3] || 3), W = +(process.argv[4] || 1920), H = Math.round(W * 9 / 16);
-const html = 'file://' + path.resolve('output/資訊安全保證_動畫簡報.html') + '?capture';
+const html = 'file://' + path.resolve('index.html') + '?capture';
 const tmp = path.resolve('build/video'); fs.mkdirSync(tmp, { recursive: true });
 const browser = await chromium.launch();
 
