@@ -235,12 +235,13 @@ body.capture .screen{border-radius:0;box-shadow:none}
 .end-c{font:500 32px/1.5 var(--f-body);color:var(--ink-2)}
 
 /* characters + subtitle */
-.chr{position:absolute;overflow:visible}
-#allan{left:1350px;top:372px;width:360px;height:508px}
-#arale{left:1665px;top:500px;width:250px;height:375px}
+.chr{position:absolute;transform-origin:50% 100%}
+.chr img,.chr svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+#allan{left:1362px;top:278px;width:296px;height:600px}
+#arale{left:1684px;top:440px;width:214px;height:438px}
 .nm{position:absolute;font:400 24px/1 var(--f-display);color:#fff;border-radius:999px;padding:8px 16px;white-space:nowrap}
-#nmA{left:1452px;top:862px;background:var(--ink)}
-#nmR{left:1712px;top:862px;background:#13a58f}
+#nmA{left:1432px;top:864px;background:var(--ink)}
+#nmR{left:1718px;top:864px;background:#13a58f}
 .sub{position:absolute;left:60px;right:60px;top:900px;height:150px;background:rgba(255,255,255,.95);border-radius:28px;box-shadow:0 8px 0 var(--leaf);display:grid;grid-template-columns:auto 1fr;align-items:center;gap:26px;padding:0 36px}
 .who{font:400 30px/1 var(--f-display);color:#fff;border-radius:16px;padding:14px 18px;white-space:nowrap}
 .who.A{background:var(--ink)} .who.R{background:#13a58f}
@@ -283,85 +284,44 @@ const esc = (s) => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>
 const LENS = {ops:'ISMS作業重點', audit:'稽核查核重點', ng:'常見的缺失'};
 
 /* ---------- characters (original Q-version designs) ---------- */
+/* Character art comes from the user's own character sheets (assets/*.webp, see tools/make_sprites.py).
+   Overlays in sprite pixel coordinates add blinking and lip-sync on top of the artwork. */
+const ALLAN_W = 677, ALLAN_H = 1371, ARALE_W = 322, ARALE_H = 661;
 const ALLAN = `
-<svg viewBox="0 0 340 480" class="chr" id="allan" aria-label="Q版 Allan Lo 講師">
- <ellipse cx="170" cy="470" rx="115" ry="12" fill="rgba(31,56,100,.18)"/>
- <g id="aBody">
-  <rect x="122" y="395" width="38" height="62" rx="14" fill="#2b3754"/>
-  <rect x="180" y="395" width="38" height="62" rx="14" fill="#2b3754"/>
-  <ellipse cx="137" cy="458" rx="30" ry="13" fill="#1b1b1b"/>
-  <ellipse cx="203" cy="458" rx="30" ry="13" fill="#1b1b1b"/>
-  <g id="aArmR"><rect x="230" y="285" width="40" height="100" rx="20" fill="#2f4a7a"/><circle cx="250" cy="388" r="19" fill="#ffd7b5"/></g>
-  <path d="M95 302 Q95 266 132 260 L208 260 Q245 266 245 302 L245 402 Q245 414 233 414 L107 414 Q95 414 95 402Z" fill="#2f4a7a"/>
-  <path d="M138 260 L170 322 L202 260Z" fill="#fff"/>
-  <path d="M138 260 L170 322 L150 334 L126 268Z" fill="#253d66"/>
-  <path d="M202 260 L170 322 L190 334 L214 268Z" fill="#253d66"/>
-  <path d="M161 274 L179 274 L184 342 L170 358 L156 342Z" fill="#e0463a"/>
-  <path d="M159 262 L181 262 L177 278 L163 278Z" fill="#c2362c"/>
-  <rect x="198" y="340" width="42" height="22" rx="5" fill="#fff"/>
-  <text x="219" y="356" text-anchor="middle" font-size="12" font-weight="700" fill="#1f3864" font-family="sans-serif">ALLAN</text>
-  <g id="aArmL">
-   <rect x="86" y="388" width="8" height="92" rx="4" fill="#8a5a2b"/>
-   <circle cx="90" cy="482" r="9" fill="#e0463a"/>
-   <rect x="70" y="285" width="40" height="100" rx="20" fill="#2f4a7a"/><circle cx="90" cy="388" r="19" fill="#ffd7b5"/>
+<div class="chr" id="allan" role="img" aria-label="Allan Lo 講師">
+ <img src="__ALLAN_SRC__" alt="" style="transform:scaleX(-1)">
+ <svg viewBox="0 0 ${ALLAN_W} ${ALLAN_H}">
+  <defs><filter id="soft" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="2.5"/></filter></defs>
+  <rect x="370" y="607" width="46" height="69" rx="4" fill="#fff"/>
+  <text x="393" y="637" text-anchor="middle" font-size="17" font-weight="700" fill="#222" font-family="sans-serif">Allan</text>
+  <text x="393" y="662" text-anchor="middle" font-size="20" font-weight="700" fill="#222" font-family="sans-serif">Lo</text>
+  <g id="aBlink" style="display:none">
+   <ellipse cx="472" cy="192" rx="23" ry="14" fill="#f6bd9d" filter="url(#soft)"/><ellipse cx="354" cy="192" rx="23" ry="14" fill="#f6bd9d" filter="url(#soft)"/>
+   <path d="M454 194 Q472 203 490 194 M336 194 Q354 203 372 194" stroke="#2a1d1a" stroke-width="4.5" fill="none" stroke-linecap="round"/>
   </g>
-  <g id="aHead">
-   <rect x="154" y="236" width="32" height="30" rx="8" fill="#f2c6a0"/>
-   <circle cx="66" cy="165" r="21" fill="#ffd7b5"/><circle cx="274" cy="165" r="21" fill="#ffd7b5"/>
-   <ellipse cx="170" cy="150" rx="110" ry="102" fill="#ffdfc4"/>
-   <path d="M60 168 Q48 70 132 44 Q210 22 266 74 Q292 106 282 170 Q272 124 246 106 Q214 128 160 112 Q118 100 94 120 Q72 140 60 168Z" fill="#2a2522"/>
-   <path d="M150 50 Q120 80 100 118 Q140 84 190 76Z" fill="#3b3430"/>
-   <path d="M66 150 Q68 130 74 122" stroke="#8d8681" stroke-width="5" fill="none" stroke-linecap="round"/>
-   <path d="M274 150 Q272 130 266 122" stroke="#8d8681" stroke-width="5" fill="none" stroke-linecap="round"/>
-   <path id="aBrowL" d="M98 122 Q122 110 148 120" stroke="#2a2522" stroke-width="9" fill="none" stroke-linecap="round"/>
-   <path id="aBrowR" d="M192 120 Q218 110 242 122" stroke="#2a2522" stroke-width="9" fill="none" stroke-linecap="round"/>
-   <ellipse id="aEyeL" cx="124" cy="156" rx="9" ry="11" fill="#2a2522"/>
-   <ellipse id="aEyeR" cx="216" cy="156" rx="9" ry="11" fill="#2a2522"/>
-   <circle cx="127" cy="152" r="3" fill="#fff"/><circle cx="219" cy="152" r="3" fill="#fff"/>
-   <rect x="88" y="130" width="70" height="52" rx="16" fill="rgba(255,255,255,.22)" stroke="#1d1d1d" stroke-width="6"/>
-   <rect x="182" y="130" width="70" height="52" rx="16" fill="rgba(255,255,255,.22)" stroke="#1d1d1d" stroke-width="6"/>
-   <path d="M158 150 Q170 141 182 150" stroke="#1d1d1d" stroke-width="6" fill="none"/>
-   <path d="M88 146 L66 140 M252 146 L274 140" stroke="#1d1d1d" stroke-width="5"/>
-   <path d="M166 174 Q170 188 176 184" stroke="#d99a76" stroke-width="4" fill="none" stroke-linecap="round"/>
-   <circle cx="100" cy="198" r="15" fill="#ff9c8a" opacity=".45"/><circle cx="240" cy="198" r="15" fill="#ff9c8a" opacity=".45"/>
-   <path id="aMouthC" d="M146 206 Q170 226 194 206" stroke="#7a2e1e" stroke-width="6" fill="none" stroke-linecap="round"/>
-   <g id="aMouthO"><ellipse id="aMo" cx="170" cy="212" rx="18" ry="12" fill="#8b2b23"/><ellipse id="aTo" cx="170" cy="218" rx="10" ry="5" fill="#ef7f74"/></g>
+  <g id="aMouth" style="display:none">
+   <ellipse cx="414" cy="287" rx="62" ry="15" fill="#fcc6a3" filter="url(#soft)"/>
+   <path id="aMo" fill="#7a2a24" stroke="#2a1d1a" stroke-width="4" stroke-linejoin="round"/>
+   <ellipse id="aTo" fill="#e8776d"/>
   </g>
- </g>
-</svg>`;
+ </svg>
+</div>`;
 const ARALE = `
-<svg viewBox="0 0 260 390" class="chr" id="arale" aria-label="助教阿拉蕾（原創Q版機器人少女）">
- <ellipse cx="130" cy="380" rx="80" ry="10" fill="rgba(31,56,100,.18)"/>
- <g id="rBody">
-  <rect x="98" y="318" width="26" height="46" rx="10" fill="#fff"/><rect x="136" y="318" width="26" height="46" rx="10" fill="#fff"/>
-  <ellipse cx="110" cy="368" rx="22" ry="11" fill="#e0463a"/><ellipse cx="150" cy="368" rx="22" ry="11" fill="#e0463a"/>
-  <g id="rArmL"><rect x="52" y="236" width="30" height="72" rx="15" fill="#ff7b5c"/><circle cx="66" cy="310" r="15" fill="#ffe0c6"/></g>
-  <g id="rArmR"><rect x="178" y="236" width="30" height="72" rx="15" fill="#ff7b5c"/><circle cx="194" cy="310" r="15" fill="#ffe0c6"/></g>
-  <path d="M78 250 Q78 228 104 226 L156 226 Q182 228 182 250 L190 330 L70 330Z" fill="#ff7b5c"/>
-  <path d="M86 262 L174 262 L184 332 L76 332Z" fill="#ffc93c"/>
-  <rect x="96" y="246" width="12" height="24" rx="4" fill="#ffc93c"/><rect x="152" y="246" width="12" height="24" rx="4" fill="#ffc93c"/>
-  <rect x="106" y="280" width="48" height="30" rx="8" fill="#fff"/>
-  <text x="130" y="302" text-anchor="middle" font-size="18" font-weight="900" fill="#13a58f" font-family="sans-serif">助教</text>
-  <g id="rHead">
-   <line x1="130" y1="56" x2="130" y2="14" stroke="#555" stroke-width="5"/>
-   <path id="rStar" d="M130 -6 L136 8 L151 9 L139 18 L143 33 L130 25 L117 33 L121 18 L109 9 L124 8Z" fill="#ffd400" stroke="#e0a800" stroke-width="2"/>
-   <circle cx="56" cy="78" r="30" fill="#2fbfa8"/><circle cx="204" cy="78" r="30" fill="#2fbfa8"/>
-   <ellipse cx="130" cy="146" rx="94" ry="88" fill="#ffe4cc"/>
-   <path d="M38 150 Q30 60 130 54 Q230 60 222 150 Q214 112 186 100 Q170 124 130 112 Q92 124 74 100 Q46 112 38 150Z" fill="#2fbfa8"/>
-   <path d="M38 150 Q36 190 50 214 Q46 176 52 152Z" fill="#2fbfa8"/><path d="M222 150 Q224 190 210 214 Q214 176 208 152Z" fill="#2fbfa8"/>
-   <rect x="36" y="128" width="20" height="40" rx="8" fill="#9aa4b1"/><rect x="204" y="128" width="20" height="40" rx="8" fill="#9aa4b1"/>
-   <g id="rEyes">
-    <ellipse id="rEyeL" cx="96" cy="152" rx="20" ry="25" fill="#24304a"/>
-    <ellipse id="rEyeR" cx="164" cy="152" rx="20" ry="25" fill="#24304a"/>
-    <circle cx="102" cy="142" r="7" fill="#fff"/><circle cx="170" cy="142" r="7" fill="#fff"/>
-    <circle cx="90" cy="162" r="3.5" fill="#fff"/><circle cx="158" cy="162" r="3.5" fill="#fff"/>
-   </g>
-   <circle cx="72" cy="190" r="14" fill="#ff8fa3" opacity=".55"/><circle cx="188" cy="190" r="14" fill="#ff8fa3" opacity=".55"/>
-   <path id="rMouthC" d="M116 196 Q130 208 144 196" stroke="#8b2b23" stroke-width="5" fill="none" stroke-linecap="round"/>
-   <path id="rMouthO" d="M114 194 L146 194 Q146 220 130 220 Q114 220 114 194Z" fill="#8b2b23"/>
+<div class="chr" id="arale" role="img" aria-label="阿拉蕾 助教">
+ <img src="__ARALE_SRC__" alt="">
+ <svg viewBox="0 0 ${ARALE_W} ${ARALE_H}">
+  <defs><filter id="soft2" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
+  <g id="rBlink" style="display:none">
+   <ellipse cx="143" cy="130" rx="13" ry="15" fill="#ecc6b2" filter="url(#soft2)"/><ellipse cx="197" cy="130" rx="13" ry="15" fill="#ecc6b2" filter="url(#soft2)"/>
+   <path d="M132 132 Q143 139 154 132 M186 132 Q197 139 208 132" stroke="#1f2440" stroke-width="3" fill="none" stroke-linecap="round"/>
   </g>
- </g>
-</svg>`;
+  <g id="rMouth" style="display:none">
+   <ellipse cx="171" cy="171" rx="25" ry="14" fill="#f6c6ab" filter="url(#soft2)"/>
+   <path id="rMo" fill="#8b2b23" stroke="#2a1d1a" stroke-width="2.6" stroke-linejoin="round"/>
+   <ellipse id="rTo" fill="#ef7f74"/>
+  </g>
+ </svg>
+</div>`;
 
 /* ---------- scene builders ---------- */
 function anim(node, t, a = 'rise', dur) {
@@ -592,8 +552,8 @@ const sceneItems = sceneEls.map(el => [...el.querySelectorAll('.it')].map(n => (
 const sceneHl = sceneEls.map(el => [...el.querySelectorAll('.hl')]);
 const G = id => document.getElementById(id);
 const E = {tag: G('tag'), lens: G('lens'), who: G('who'), say: G('say'), sub: G('sub'), prog: G('prog'),
-  aBody: G('aBody'), aHead: G('aHead'), aArmL: G('aArmL'), aArmR: G('aArmR'), aEyeL: G('aEyeL'), aEyeR: G('aEyeR'), aMC: G('aMouthC'), aMO: G('aMouthO'), aMo: G('aMo'), aTo: G('aTo'), aBrowL: G('aBrowL'), aBrowR: G('aBrowR'),
-  rBody: G('rBody'), rHead: G('rHead'), rArmL: G('rArmL'), rArmR: G('rArmR'), rEyes: G('rEyes'), rMC: G('rMouthC'), rMO: G('rMouthO'), rStar: G('rStar'), nmA: G('nmA'), nmR: G('nmR')};
+  allan: G('allan'), aBlink: G('aBlink'), aMouth: G('aMouth'), aMo: G('aMo'), aTo: G('aTo'),
+  arale: G('arale'), rBlink: G('rBlink'), rMouth: G('rMouth'), rMo: G('rMo'), rTo: G('rTo'), nmA: G('nmA'), nmR: G('nmR')};
 const bubEls = [...stage.querySelectorAll('.bub')];
 
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -605,6 +565,13 @@ let curScene = -1, lastLineKey = '';
 function sceneAt(t) { for (let i = scenes.length - 1; i >= 0; i--) if (t >= scenes[i].t0) return i; return 0; }
 function blink(t, period, off) { const ph = (t + off) % period; return ph < 0.13 ? 0.12 : 1; }
 
+function mouth(g, mo, to, open, amp, cx, top, hw0, hwA, d0, dA) {
+  g.style.display = open ? '' : 'none';
+  if (!open) return;
+  const hw = hw0 + hwA * amp, d = d0 + dA * amp, b = top + d;
+  mo.setAttribute('d', `M${cx - hw} ${top} Q${cx} ${top - 3} ${cx + hw} ${top} Q${cx + hw * 0.8} ${b} ${cx} ${b} Q${cx - hw * 0.8} ${b} ${cx - hw} ${top}Z`);
+  to.setAttribute('cx', cx); to.setAttribute('cy', top + d * 0.72); to.setAttribute('rx', hw * 0.45); to.setAttribute('ry', d * 0.22);
+}
 function render(t) {
   t = clamp(t, 0, TOTAL);
   const si = sceneAt(t), sc = scenes[si];
@@ -649,33 +616,19 @@ function render(t) {
   const amp = speaking ? (+(env[k] || 0)) / 9 : 0;
   // ---- Allan ----
   const aTalk = speaking === 'A';
-  const aBob = Math.sin(t * 2.1) * 4 + (aTalk ? -Math.abs(Math.sin(t * 5.2)) * 5 : 0);
-  E.aBody.setAttribute('transform', `translate(0 ${aBob.toFixed(2)})`);
-  E.aHead.setAttribute('transform', `rotate(${(Math.sin(t * 1.3) * 2.5 + (aTalk ? Math.sin(t * 3.1) * 2.5 : 0)).toFixed(2)} 170 240)`);
-  const armA = aTalk ? 100 + Math.sin(t * 2.3) * 16 : 14 + Math.sin(t * 1.4) * 3;
-  E.aArmL.setAttribute('transform', `rotate(${armA.toFixed(1)} 90 295)`);
-  E.aArmR.setAttribute('transform', `rotate(${(-8 + Math.sin(t * 1.7) * 3).toFixed(1)} 250 295)`);
-  const ab = blink(t, 3.7, 0.4);
-  E.aEyeL.setAttribute('ry', 11 * ab); E.aEyeR.setAttribute('ry', 11 * ab);
-  const lift = aTalk ? Math.max(0, Math.sin(t * 2.7)) * 5 : 0;
-  E.aBrowL.setAttribute('transform', `translate(0 ${-lift.toFixed(1)})`); E.aBrowR.setAttribute('transform', `translate(0 ${-lift.toFixed(1)})`);
-  const aOpen = aTalk && amp > 0.08;
-  E.aMC.style.display = aOpen ? 'none' : ''; E.aMO.style.display = aOpen ? '' : 'none';
-  if (aOpen) { E.aMo.setAttribute('ry', (4 + 15 * amp).toFixed(1)); E.aMo.setAttribute('rx', (15 + 6 * amp).toFixed(1)); E.aTo.setAttribute('cy', (212 + 9 * amp).toFixed(1)); }
+  const aBob = Math.sin(t * 2.1) * 3 + (aTalk ? -Math.abs(Math.sin(t * 4.6)) * 6 : 0);
+  const aRot = Math.sin(t * 1.3) * 0.8 + (aTalk ? Math.sin(t * 2.9) * 1.6 : 0);
+  E.allan.style.transform = `translateY(${aBob.toFixed(2)}px) rotate(${aRot.toFixed(2)}deg)`;
+  E.aBlink.style.display = blink(t, 3.7, 0.4) < 1 ? '' : 'none';
+  mouth(E.aMouth, E.aMo, E.aTo, aTalk && amp > 0.08, amp, 414, 282, 26, 6, 6, 18);
   // ---- Arale ----
   const rTalk = speaking === 'R';
-  const hop = rTalk ? -Math.abs(Math.sin(t * 6.5)) * 16 : Math.sin(t * 2.6 + 1) * 3;
-  E.rBody.setAttribute('transform', `translate(0 ${hop.toFixed(2)})`);
-  E.rHead.setAttribute('transform', `rotate(${(Math.sin(t * 1.9 + 2) * 4).toFixed(2)} 130 230)`);
-  E.rArmL.setAttribute('transform', `rotate(${(rTalk ? 60 + Math.sin(t * 7) * 25 : 8 + Math.sin(t * 2) * 4).toFixed(1)} 67 245)`);
-  E.rArmR.setAttribute('transform', `rotate(${(rTalk ? -60 - Math.sin(t * 7 + 1) * 25 : -8 - Math.sin(t * 2) * 4).toFixed(1)} 193 245)`);
-  E.rEyes.setAttribute('transform', `translate(0 ${(152 * (1 - blink(t, 4.3, 1.9))).toFixed(1)}) scale(1 ${blink(t, 4.3, 1.9)})`);
-  const rOpen = rTalk && amp > 0.08;
-  E.rMC.style.display = rOpen ? 'none' : ''; E.rMO.style.display = rOpen ? '' : 'none';
-  if (rOpen) E.rMO.setAttribute('transform', `translate(0 ${(194 * (1 - (0.35 + 0.8 * amp))).toFixed(1)}) scale(1 ${(0.35 + 0.8 * amp).toFixed(2)})`);
-  const glow = rTalk ? 0.6 + 0.4 * Math.abs(Math.sin(t * 8)) : 0.85;
-  E.rStar.setAttribute('opacity', glow.toFixed(2));
-  E.nmA.style.opacity = aTalk ? 1 : 0.55; E.nmR.style.opacity = rTalk ? 1 : 0.55;
+  const hop = rTalk ? -Math.abs(Math.sin(t * 6.5)) * 14 : Math.sin(t * 2.6 + 1) * 3;
+  const rRot = rTalk ? Math.sin(t * 5.2) * 3 : Math.sin(t * 1.9 + 2) * 1.2;
+  E.arale.style.transform = `translateY(${hop.toFixed(2)}px) rotate(${rRot.toFixed(2)}deg)`;
+  E.rBlink.style.display = blink(t, 4.3, 1.9) < 1 ? '' : 'none';
+  mouth(E.rMouth, E.rMo, E.rTo, rTalk && amp > 0.08, amp, 171, 164, 13, 5, 4, 14);
+  E.nmA.style.opacity = aTalk ? 1 : 0.6; E.nmR.style.opacity = rTalk ? 1 : 0.6;
   // ambient bubbles
   bubEls.forEach((b, i) => { b.style.transform = `translate(${(Math.sin(t * .3 + i) * 14).toFixed(1)}px, ${(Math.cos(t * .25 + i * 2) * 18).toFixed(1)}px)`; });
 }

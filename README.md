@@ -10,7 +10,9 @@
 | 8.29 | 開發及驗收中之安全測試 |
 
 - 講師：Q版 Allan Lo（台灣男聲 `zh-TW-YunJheNeural`）
-- 助教：阿拉蕾（原創Q版機器人少女造型，台灣女聲 `zh-TW-HsiaoYuNeural` 調高音）
+- 助教：阿拉蕾（台灣女聲 `zh-TW-HsiaoYuNeural` 調高音）
+- 角色造型取自 `assets/source/` 的角色設定圖，由 `tools/make_sprites.py` 裁切去背成 `assets/*.webp`，
+  播放器在立繪上疊加眨眼與依旁白音量開合的嘴型
 - 長度：約 11.5 分鐘，16 個段落（開場、全景圖、各控制的作業／稽核／案例／缺失、總整理、隨堂測驗、結語）
 
 ## 成品
@@ -27,6 +29,7 @@
 
 ```bash
 pip install edge-tts
+python3 tools/make_sprites.py                # 更換角色設定圖後重新裁切立繪
 python3 tools/build.py                       # 產生語音、時間軸、index.html 播放器
 NODE_PATH=/opt/node-tools/node_modules \
   node tools/render_video.mjs 20 3 1920      # 渲染 MP4（fps、平行數、寬度）
