@@ -46,6 +46,10 @@ const segs = await Promise.all([...Array(WORKERS).keys()].map(worker));
 await browser.close();
 fs.writeFileSync(path.join(tmp, 'list.txt'), segs.map(s => `file '${s}'`).join('\n'));
 const outFile = path.resolve('output/資訊安全保證_動畫簡報.mp4');
-execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', path.join(tmp, 'list.txt'), '-i', path.resolve('build/narration.mp3'),
-  '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-shortest', '-movflags', '+faststart', outFile], { stdio: 'inherit' });
+// two-pass encode at a fixed bitrate keeps the file under GitHub's 100 MB limit
+const concat = ['-f', 'concat', '-safe', '0', '-i', path.join(tmp, 'list.txt')];
+const vopt = ['-c:v', 'libx264', '-preset', 'slow', '-b:v', '900k', '-passlogfile', path.join(tmp, 'pass')];
+execFileSync('ffmpeg', ['-v', 'error', '-y', ...concat, ...vopt, '-pass', '1', '-an', '-f', 'null', '/dev/null'], { stdio: 'inherit' });
+execFileSync('ffmpeg', ['-v', 'error', '-y', ...concat, '-i', path.resolve('build/narration.mp3'), ...vopt, '-pass', '2',
+  '-c:a', 'aac', '-b:a', '96k', '-shortest', '-movflags', '+faststart', outFile], { stdio: 'inherit' });
 console.log('Wrote', outFile, (fs.statSync(outFile).size / 1e6).toFixed(1), 'MB');
